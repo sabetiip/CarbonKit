@@ -40,14 +40,18 @@
         // Disable scroll indicators
         self.showsHorizontalScrollIndicator = self.showsVerticalScrollIndicator = NO;
 
-        if (@available(iOS 11.0, *)) {
-            [self setContentInsetAdjustmentBehavior:UIScrollViewContentInsetAdjustmentNever];
+        // Support RTL
+        if ([UIApplication sharedApplication].userInterfaceLayoutDirection ==
+                UIUserInterfaceLayoutDirectionRightToLeft &&
+            [self respondsToSelector:@selector(semanticContentAttribute)]) {
+            self.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
         }
     }
     return self;
 }
 
 - (void)setItems:(NSArray *)items {
+    // Remove all subviews if it exists.
     for (UIView *view in self.subviews) {
         [view removeFromSuperview];
     }
@@ -70,7 +74,10 @@
         _carbonSegmentedControl.frame = segmentRect;
 
         // Min content width equal to scroll view width
-        CGFloat contentWidth = MAX(CGRectGetWidth(segmentRect), CGRectGetWidth(self.frame) + 1);
+        CGFloat contentWidth = [_carbonSegmentedControl getWidth];
+        if (contentWidth < CGRectGetWidth(self.frame)) {
+            contentWidth = CGRectGetWidth(self.frame) + 1;
+        }
 
         // Scroll view content size
         self.contentSize = CGSizeMake(contentWidth, CGRectGetHeight(self.frame));

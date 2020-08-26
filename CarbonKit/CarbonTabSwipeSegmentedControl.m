@@ -43,6 +43,14 @@
         self.indicator.autoresizingMask = UIViewAutoresizingNone;
         [self addSubview:self.indicator];
 
+        // Support RTL
+        if ([UIApplication sharedApplication].userInterfaceLayoutDirection ==
+                UIUserInterfaceLayoutDirectionRightToLeft &&
+            [self respondsToSelector:@selector(semanticContentAttribute)]) {
+            self.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
+            self.indicator.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
+        }
+
         // Custimize segmented control
         id titleAttr = @{
             NSForegroundColorAttributeName : [self.tintColor colorWithAlphaComponent:0.8],
@@ -62,14 +70,6 @@
             forLeftSegmentState:UIControlStateNormal
               rightSegmentState:UIControlStateNormal
                      barMetrics:UIBarMetricsDefault];
-
-        [self setClipsToBounds:FALSE];
-        [self setBackgroundImage:[UIImage new]
-                        forState:UIControlStateNormal
-                      barMetrics:UIBarMetricsDefault];
-        [self setBackgroundImage:[UIImage new]
-                        forState:UIControlStateSelected
-                      barMetrics:UIBarMetricsDefault];
 
         // Fix indicator frame
         if (items) {
@@ -183,9 +183,6 @@
 }
 
 - (CGFloat)getWidthForSegmentAtIndex:(NSUInteger)index {
-    if (![self isRTL] && index == [self.segments count] - 1) {
-        return CGRectGetWidth(self.frame) - CGRectGetMinX(self.segments[index].frame);
-    }
     return CGRectGetWidth(self.segments[index].frame);
 }
 
@@ -221,13 +218,6 @@
                          rect.size.height = self.indicatorHeight;
                          self.indicator.frame = rect;
                      }];
-}
-
-- (BOOL)isRTL {
-    if (@available(iOS 9.0, *)) {
-        return [UIView userInterfaceLayoutDirectionForSemanticContentAttribute:self.semanticContentAttribute] == UIUserInterfaceLayoutDirectionRightToLeft;
-    }
-    return NO;
 }
 
 @end
